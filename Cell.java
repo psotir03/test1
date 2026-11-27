@@ -17,8 +17,7 @@ public class Cell {
         antIds = null;
     }
     public boolean hasFood(){
-    if(foodAmount > 0) return true;
-    return false;
+        return foodAmount > 0;
     }
     public void getFood(){
         foodAmount--;
@@ -30,8 +29,7 @@ public class Cell {
         foodAmount+=food;
     }
     public boolean hasAnts(){
-        if(antIds==null) return false;
-        return true;
+        return antIds!= null;
     }
     public void putNest(){
         hasNest=true;
@@ -42,5 +40,55 @@ public class Cell {
     public int getScent(){
         return scentAmount;
     }
-    
+    public void addAnt(int antID){
+        if(antIds==null){
+            antIds= new int[1];
+            antIds[0]=antID;
+        }
+        int[] temp= antIds;
+        antIds= new int[temp.length+1];
+        for(int i=0; i<temp.length; i++)
+            antIds[i]=temp[i];
+        antIds[temp.length]=antID;
+    }
+    public void removeAnt(int antID){
+        int[] temp= antIds;
+        antIds= new int[temp.length-1];
+        int cnt=0;
+        for(int i=0; i<temp.length; i++){
+            if(antID!=temp[i])
+                antIds[cnt++]= temp[0];
+        }
+    }
+    public void addScent(int time){
+        scentAmount++;
+        int[] temp=times;
+        times= new int[temp.length+1];
+        for(int i=0; i<temp.length; i++)
+            times[i]=temp[i];
+        times[temp.length]= time;
+    }
+    public void updateScent(int curTime, int elapsed){
+        int cnt=0;
+        for(int i=0 ; i<times.length; i++){
+            if(curTime-times[i] < elapsed) cnt++;
+        }
+        int[] temp= times;
+        times= new int[cnt];
+        cnt=0;
+        for(int i=0; i<times.length; i++){
+            if(curTime-temp[i] < elapsed)
+                times[cnt++]= temp[i];
+        }
+    }
+    public String toString(){
+            String text="";
+            if(hasNest) text+="Cell that has a nest.\n";
+            else text+="Cell that does not have a nest.\n";
+            if(foodAmount>0) text+="- There are "+foodAmount+"seeds.\n";
+            else text+="- There are no seeds.\n";
+            if(scentAmount>0) text+= "- Currently it is annotated with "+scentAmount+" units of scent.\n";
+            text+="- At present there are"+1+"ants on it.\n"; //fix  it
+            return text;
+    }
 }

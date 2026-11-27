@@ -34,12 +34,10 @@ public class Ant {
         return false;
     }
     public boolean wasAt(int x, int y){
-        if(previousX==x && previousY==y) return true;
-        return false;
+        return previousX==x && previousY==y;
     }
     public boolean isAt(int x, int y){
-        if(pos[0]==x && pos[1]==y) return true;
-        return false;
+        return pos[0]==x && pos[1]==y;
     }
     public int getId(){
         return id;
@@ -54,6 +52,59 @@ public class Ant {
         return carriesFood;
     }
     public void move(int time){
-        
+        if (!carriesFood) searchFood(time);
+       // else goBackNest(time);
+    }
+    private void searchFood(int time){
+        int size= terain.getSize();
+        int[] scent= new int[3];
+        int[][] scentPos= new int[2][3];
+        int maxi=-1, cnt=0, starti=-1, endi=2, startk=-1, endk=2;
+        if(pos[0]==0) starti=0;
+        if(pos[0]==size-1) endi=1;
+        if(pos[1]==0) startk=0;
+        if(pos[1]==size-1) endk=1;
+        for(int i=starti; i<endi; i++){
+            for(int k=startk; k<endk; k++){
+                if(!wasAt(pos[0]+i, pos[1]+k) && ((i==0 && k!=0) || (k==0 && i!=0))
+                && maxi<terain.getCell(pos[0]+i, pos[1]+k).getScent()){ 
+                    scent[cnt]= terain.getCell(pos[0]+i, pos[1]+k).getScent();
+                    maxi=scent[cnt];
+                    scentPos[0][cnt]= pos[0]+i;
+                    scentPos[1][cnt++]= pos[1]+k;
+                }
+            }
+        }
+        int maxiCnt=1;
+        for(int i=0; i<3; i++)
+            if(maxi==scent[i])
+                maxiCnt++;
+        maxiCnt=(int)(maxiCnt* Math.random());
+        cnt=0;
+        int[]  maxiPos= new int[2];
+        for(int i=0; i<3; i++)
+            if(maxi == scent[i] && ++cnt==maxiCnt){
+                maxiPos[0]= scentPos[0][i];
+                maxiPos[1]= scentPos[1][i];
+            }
+    
+        terain.getCell(maxiPos[0], maxiPos[1]).addAnt(id);
+        terain.getCell(pos[0], pos[1]).removeAnt(id);
+        previousX= pos[0];
+        previousY= pos[1];
+        pos[0]= maxiPos[0];
+        pos[1]= maxiPos[1];
+    }
+    public String toString(){
+        if(isAtNest() && carries_food())
+             return color+""+id+" at "+"("+pos[0]+","+pos[1]+")"+"It has returned to its nest and has food to deliver.";
+        if(isAtNest()) 
+            return color+""+id+" at "+"("+pos[0]+","+pos[1]+")"+"It is at its nest and does not hold any food.";
+        if(!isAtNest() && !carries_food()) 
+            return color+""+id+" at "+"("+pos[0]+","+pos[1]+")"+"It is out looking for food.";
+        if(!isAtNest() && carries_food()) 
+            return color+""+id+" at "+"("+pos[0]+","+pos[1]+")"+"It has found food!";
+        //need to find a way to print "It is going back to its nest with food."
+        return "";
     }
 }
